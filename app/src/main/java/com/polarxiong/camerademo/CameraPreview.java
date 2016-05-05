@@ -1,6 +1,5 @@
 package com.polarxiong.camerademo;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -117,7 +116,6 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     }
 
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
-        System.out.println("+++++++++++surface changed++++++++++");
         int rotation=getDisplayOrientation();
         mCamera.setDisplayOrientation(rotation);
         Camera.Parameters parameters=mCamera.getParameters();
