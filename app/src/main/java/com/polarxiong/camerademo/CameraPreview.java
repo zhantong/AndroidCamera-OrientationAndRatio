@@ -1,5 +1,6 @@
 package com.polarxiong.camerademo;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -12,8 +13,11 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.Display;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.WindowManager;
 import android.widget.ImageView;
 
 import java.io.File;
@@ -113,6 +117,46 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     }
 
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
+        System.out.println("+++++++++++surface changed++++++++++");
+        int rotation=getDisplayOrientation();
+        mCamera.setDisplayOrientation(rotation);
+        Camera.Parameters parameters=mCamera.getParameters();
+        parameters.setRotation(rotation);
+        mCamera.setParameters(parameters);
+    }
+    public int getDisplayOrientation() {
+
+        android.hardware.Camera.CameraInfo camInfo =
+                new android.hardware.Camera.CameraInfo();
+        android.hardware.Camera.getCameraInfo(Camera.CameraInfo.CAMERA_FACING_BACK, camInfo);
+
+
+        Display display = ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+        int rotation = display.getRotation();
+        int degrees = 0;
+        switch (rotation) {
+            case Surface.ROTATION_0:
+                degrees = 0;
+                break;
+            case Surface.ROTATION_90:
+                degrees = 90;
+                break;
+            case Surface.ROTATION_180:
+                degrees = 180;
+                break;
+            case Surface.ROTATION_270:
+                degrees = 270;
+                break;
+        }
+
+        int result;
+        if (camInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+            result = (camInfo.orientation + degrees) % 360;
+            result = (360 - result) % 360;  // compensate the mirror
+        } else {  // back-facing
+            result = (camInfo.orientation - degrees + 360) % 360;
+        }
+        return result;
     }
     private boolean prepareVideoRecorder(){
 
@@ -136,6 +180,8 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
         mMediaRecorder.setPreviewDisplay(mHolder.getSurface());
 
+        int rotation=getDisplayOrientation();
+        mMediaRecorder.setOrientationHint(rotation);
         try {
             mMediaRecorder.prepare();
         } catch (IllegalStateException e) {
