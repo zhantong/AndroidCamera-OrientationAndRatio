@@ -3,6 +3,7 @@ package com.polarxiong.camerademo;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
@@ -16,6 +17,7 @@ import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
@@ -121,6 +123,36 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         Camera.Parameters parameters=mCamera.getParameters();
         parameters.setRotation(rotation);
         mCamera.setParameters(parameters);
+        adjustDisplayRatio(rotation);
+
+    }
+    private void adjustDisplayRatio(int rotation){
+        ViewGroup parent=((ViewGroup)getParent());
+        Rect rect=new Rect();
+        parent.getLocalVisibleRect(rect);
+        int width=rect.width();
+        int height=rect.height();
+        Camera.Size previewSize=mCamera.getParameters().getPreviewSize();
+        int previewWidth;
+        int previewHeight;
+        if(rotation==90||rotation==270){
+            previewWidth=previewSize.height;
+            previewHeight=previewSize.width;
+        }else{
+            previewWidth=previewSize.width;
+            previewHeight=previewSize.height;
+        }
+
+        if (width * previewHeight > height * previewWidth) {
+            final int scaledChildWidth = previewWidth * height / previewHeight;
+
+            layout((width - scaledChildWidth) / 2, 0,
+                    (width + scaledChildWidth) / 2, height);
+        } else {
+            final int scaledChildHeight = previewHeight * width / previewWidth;
+            layout(0, (height - scaledChildHeight) / 2,
+                    width, (height + scaledChildHeight) / 2);
+        }
     }
     public int getDisplayOrientation() {
 
