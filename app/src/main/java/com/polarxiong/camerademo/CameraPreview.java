@@ -38,8 +38,8 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     private Uri outputMediaFileUri;
     private String outputMediaFileType;
 
-    public void takePicture(final ImageView view){
-        mCamera.takePicture(null,null,new Camera.PictureCallback() {
+    public void takePicture(final ImageView view) {
+        mCamera.takePicture(null, null, new Camera.PictureCallback() {
             @Override
             public void onPictureTaken(byte[] data, Camera camera) {
                 File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
@@ -62,7 +62,8 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             }
         });
     }
-    public boolean startRecording(){
+
+    public boolean startRecording() {
         if (prepareVideoRecorder()) {
             mMediaRecorder.start();
             return true;
@@ -71,17 +72,20 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         }
         return false;
     }
-    public void stopRecording(final ImageView view){
-        if(mMediaRecorder!=null) {
+
+    public void stopRecording(final ImageView view) {
+        if (mMediaRecorder != null) {
             mMediaRecorder.stop();
-            Bitmap thumbnail= ThumbnailUtils.createVideoThumbnail(outputMediaFileUri.getPath(), MediaStore.Video.Thumbnails.MINI_KIND);
+            Bitmap thumbnail = ThumbnailUtils.createVideoThumbnail(outputMediaFileUri.getPath(), MediaStore.Video.Thumbnails.MINI_KIND);
             view.setImageBitmap(thumbnail);
         }
         releaseMediaRecorder();
     }
-    public boolean isRecording(){
-        return mMediaRecorder!=null;
+
+    public boolean isRecording() {
+        return mMediaRecorder != null;
     }
+
     public CameraPreview(Context context) {
         super(context);
         mHolder = getHolder();
@@ -118,29 +122,30 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     }
 
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
-        int rotation=getDisplayOrientation();
+        int rotation = getDisplayOrientation();
         mCamera.setDisplayOrientation(rotation);
-        Camera.Parameters parameters=mCamera.getParameters();
+        Camera.Parameters parameters = mCamera.getParameters();
         parameters.setRotation(rotation);
         mCamera.setParameters(parameters);
         adjustDisplayRatio(rotation);
 
     }
-    private void adjustDisplayRatio(int rotation){
-        ViewGroup parent=((ViewGroup)getParent());
-        Rect rect=new Rect();
+
+    private void adjustDisplayRatio(int rotation) {
+        ViewGroup parent = ((ViewGroup) getParent());
+        Rect rect = new Rect();
         parent.getLocalVisibleRect(rect);
-        int width=rect.width();
-        int height=rect.height();
-        Camera.Size previewSize=mCamera.getParameters().getPreviewSize();
+        int width = rect.width();
+        int height = rect.height();
+        Camera.Size previewSize = mCamera.getParameters().getPreviewSize();
         int previewWidth;
         int previewHeight;
-        if(rotation==90||rotation==270){
-            previewWidth=previewSize.height;
-            previewHeight=previewSize.width;
-        }else{
-            previewWidth=previewSize.width;
-            previewHeight=previewSize.height;
+        if (rotation == 90 || rotation == 270) {
+            previewWidth = previewSize.height;
+            previewHeight = previewSize.width;
+        } else {
+            previewWidth = previewSize.width;
+            previewHeight = previewSize.height;
         }
 
         if (width * previewHeight > height * previewWidth) {
@@ -154,6 +159,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
                     width, (height + scaledChildHeight) / 2);
         }
     }
+
     public int getDisplayOrientation() {
 
         android.hardware.Camera.CameraInfo camInfo =
@@ -179,16 +185,11 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
                 break;
         }
 
-        int result;
-        if (camInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-            result = (camInfo.orientation + degrees) % 360;
-            result = (360 - result) % 360;  // compensate the mirror
-        } else {  // back-facing
-            result = (camInfo.orientation - degrees + 360) % 360;
-        }
+        int result = (camInfo.orientation - degrees + 360) % 360;
         return result;
     }
-    private boolean prepareVideoRecorder(){
+
+    private boolean prepareVideoRecorder() {
 
         mCamera = getCameraInstance();
         mMediaRecorder = new MediaRecorder();
@@ -201,16 +202,16 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
         mMediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH));
 
-        SharedPreferences prefs=PreferenceManager.getDefaultSharedPreferences(getContext());
-        String prefVideoSize=prefs.getString("video_size","");
-        String[] split=prefVideoSize.split("x");
-        mMediaRecorder.setVideoSize(Integer.parseInt(split[0]),Integer.parseInt(split[1]));
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+        String prefVideoSize = prefs.getString("video_size", "");
+        String[] split = prefVideoSize.split("x");
+        mMediaRecorder.setVideoSize(Integer.parseInt(split[0]), Integer.parseInt(split[1]));
 
         mMediaRecorder.setOutputFile(getOutputMediaFile(MEDIA_TYPE_VIDEO).toString());
 
         mMediaRecorder.setPreviewDisplay(mHolder.getSurface());
 
-        int rotation=getDisplayOrientation();
+        int rotation = getDisplayOrientation();
         mMediaRecorder.setOrientationHint(rotation);
         try {
             mMediaRecorder.prepare();
@@ -225,43 +226,47 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         }
         return true;
     }
-    private void releaseMediaRecorder(){
-        if(mMediaRecorder!=null){
+
+    private void releaseMediaRecorder() {
+        if (mMediaRecorder != null) {
             mMediaRecorder.reset();
             mMediaRecorder.release();
             mMediaRecorder = null;
             mCamera.lock();
         }
     }
-    private File getOutputMediaFile(int type){
+
+    private File getOutputMediaFile(int type) {
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_PICTURES), TAG);
-        if (! mediaStorageDir.exists()){
-            if (! mediaStorageDir.mkdirs()){
+        if (!mediaStorageDir.exists()) {
+            if (!mediaStorageDir.mkdirs()) {
                 Log.d(TAG, "failed to create directory");
                 return null;
             }
         }
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         File mediaFile;
-        if (type == MEDIA_TYPE_IMAGE){
+        if (type == MEDIA_TYPE_IMAGE) {
             mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "IMG_"+ timeStamp + ".jpg");
-            outputMediaFileType="image/*";
-        } else if(type == MEDIA_TYPE_VIDEO) {
+                    "IMG_" + timeStamp + ".jpg");
+            outputMediaFileType = "image/*";
+        } else if (type == MEDIA_TYPE_VIDEO) {
             mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "VID_"+ timeStamp + ".mp4");
-            outputMediaFileType="video/*";
+                    "VID_" + timeStamp + ".mp4");
+            outputMediaFileType = "video/*";
         } else {
             return null;
         }
-        outputMediaFileUri=Uri.fromFile(mediaFile);
+        outputMediaFileUri = Uri.fromFile(mediaFile);
         return mediaFile;
     }
-    public Uri getOutputMediaFileUri(){
+
+    public Uri getOutputMediaFileUri() {
         return outputMediaFileUri;
     }
-    public String getOutputMediaFileType(){
+
+    public String getOutputMediaFileType() {
         return outputMediaFileType;
     }
 }

@@ -14,6 +14,7 @@ import android.widget.ImageView;
  */
 public class MainActivity extends Activity {
     private CameraPreview mPreview;
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -26,7 +27,7 @@ public class MainActivity extends Activity {
                 getFragmentManager().beginTransaction().replace(R.id.camera_preview, new SettingsFragment()).addToBackStack(null).commit();
             }
         });
-        final ImageView mediaPreview  = (ImageView)findViewById(R.id.media_preview);
+        final ImageView mediaPreview = (ImageView) findViewById(R.id.media_preview);
         final Button buttonCapturePhoto = (Button) findViewById(R.id.button_capture_photo);
         buttonCapturePhoto.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -41,8 +42,8 @@ public class MainActivity extends Activity {
                 if (mPreview.isRecording()) {
                     mPreview.stopRecording(mediaPreview);
                     buttonCaptureVideo.setText("录像");
-                }else{
-                    if(mPreview.startRecording()) {
+                } else {
+                    if (mPreview.startRecording()) {
                         buttonCaptureVideo.setText("停止");
                     }
                 }
@@ -51,13 +52,14 @@ public class MainActivity extends Activity {
         mediaPreview.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent=new Intent(MainActivity.this,ShowPhotoVideo.class);
-                intent.setDataAndType(mPreview.getOutputMediaFileUri(),mPreview.getOutputMediaFileType());
-                startActivityForResult(intent,0);
+                Intent intent = new Intent(MainActivity.this, ShowPhotoVideo.class);
+                intent.setDataAndType(mPreview.getOutputMediaFileUri(), mPreview.getOutputMediaFileType());
+                startActivityForResult(intent, 0);
             }
         });
     }
-    private void initCamera(){
+
+    private void initCamera() {
         mPreview = new CameraPreview(this);
         FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
         preview.addView(mPreview);
@@ -68,13 +70,14 @@ public class MainActivity extends Activity {
         SettingsFragment.init(PreferenceManager.getDefaultSharedPreferences(this));
     }
 
-    public void onPause(){
+    public void onPause() {
         super.onPause();
-        mPreview=null;
+        mPreview = null;
     }
-    public void onResume(){
+
+    public void onResume() {
         super.onResume();
-        if(mPreview==null) {
+        if (mPreview == null) {
             initCamera();
         }
     }
